@@ -886,18 +886,29 @@
       });
     });
 
-    // Reserve space so the Osano consent banner never covers the footer
+    // Reserve space so the Osano consent banner never covers the footer.
+    // The outer .osano-cm-window wrapper has 0 height (the dialog inside is
+    // position:fixed), so measure the dialog itself and take the tallest match.
     function adjustForOsanoBanner() {
-      var banner = document.querySelector('.osano-cm-window, .osano-cm-dialog');
-      var visible = banner && banner.offsetHeight > 0 &&
-        getComputedStyle(banner).display !== 'none' &&
-        getComputedStyle(banner).visibility !== 'hidden';
-      document.body.style.paddingBottom = visible ? (banner.offsetHeight + 24) + 'px' : '';
+      var els = document.querySelectorAll('.osano-cm-dialog, .osano-cm-window');
+      var maxH = 0;
+      els.forEach(function(el) {
+        var cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') return;
+        if (el.offsetHeight > maxH) maxH = el.offsetHeight;
+      });
+      document.body.style.paddingBottom = maxH > 0 ? (maxH + 24) + 'px' : '';
     }
     var osanoObserver = new MutationObserver(adjustForOsanoBanner);
     osanoObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
     window.addEventListener('resize', adjustForOsanoBanner);
+    // Banner can render a beat late — retry for the first few seconds.
     adjustForOsanoBanner();
+    var osanoTries = 0;
+    var osanoPoll = setInterval(function() {
+      adjustForOsanoBanner();
+      if (++osanoTries >= 20) clearInterval(osanoPoll);
+    }, 300);
 
     // DSAR iframe resize listener
     window.addEventListener('message', function(e) {
