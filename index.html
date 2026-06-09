@@ -747,6 +747,24 @@
     </div>
   </div>
 
+  <!-- DSAR FORM -->
+  <div class="page" id="page-dsar">
+    <div class="section" style="max-width:780px;">
+      <div class="section-header">
+        <h2><span>Data Subject</span> Access Request</h2>
+        <p>Submit a request to access, correct, delete, or otherwise exercise your data rights.</p>
+      </div>
+      <iframe
+        id="osno-dsar-iframe"
+        frameborder="0"
+        src="https://my.datasubject.com/AzZcpvRm9bbsqngN/69968"
+        width="100%"
+        height="0"
+        style="min-width:100%;"
+      ></iframe>
+    </div>
+  </div>
+
   <!-- PRIVACY POLICY -->
   <div class="page" id="page-privacy">
     <div class="section" style="max-width:780px;">
@@ -835,6 +853,8 @@
     </p>
     <p style="margin-top:0.75rem;">
       <a href="#" data-page="privacy">Privacy Policy</a>
+       ·
+      <a href="#" data-page="dsar">Data Subject Request</a>
     </p>
   </footer>
 
@@ -862,6 +882,14 @@
         e.preventDefault();
         navigate(link.dataset.page);
       });
+    });
+
+    // DSAR iframe resize listener
+    window.addEventListener('message', function(e) {
+      var f = document.getElementById('osno-dsar-iframe');
+      if (f && e.source && e.origin && e.source === f.contentWindow && e.origin === 'https://my.datasubject.com') {
+        f.style.cssText = 'height:' + e.data + 'px;min-width:100%';
+      }
     });
 
     // Accordion
