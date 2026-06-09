@@ -756,6 +756,8 @@
       </div>
       <iframe
         id="osno-dsar-iframe"
+        class="osano-allow"
+        data-osano-category="ESSENTIAL"
         frameborder="0"
         src="https://my.datasubject.com/AzZcpvRm9bbsqngN/69968"
         width="100%"
@@ -883,6 +885,19 @@
         navigate(link.dataset.page);
       });
     });
+
+    // Reserve space so the Osano consent banner never covers the footer
+    function adjustForOsanoBanner() {
+      var banner = document.querySelector('.osano-cm-window, .osano-cm-dialog');
+      var visible = banner && banner.offsetHeight > 0 &&
+        getComputedStyle(banner).display !== 'none' &&
+        getComputedStyle(banner).visibility !== 'hidden';
+      document.body.style.paddingBottom = visible ? (banner.offsetHeight + 24) + 'px' : '';
+    }
+    var osanoObserver = new MutationObserver(adjustForOsanoBanner);
+    osanoObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
+    window.addEventListener('resize', adjustForOsanoBanner);
+    adjustForOsanoBanner();
 
     // DSAR iframe resize listener
     window.addEventListener('message', function(e) {
