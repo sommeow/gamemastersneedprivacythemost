@@ -914,21 +914,25 @@
     // my.datasubject.com under a consent-gated category and won't promote it,
     // so we inject the src ourselves. Keeping the URL in data-src hides it
     // from Osano's initial blocking scan; a programmatically-set src is not
-    // re-blocked. Re-assert briefly in case Osano's async scan strips it.
+    // re-blocked.
+    //
+    // Load only once the iframe is actually visible: the DSAR page is
+    // display:none until navigated to, and loading while hidden makes the
+    // form report a height of 0 (and it never re-reports), leaving a blank
+    // frame. An IntersectionObserver defers the src until the page is shown.
     (function ensureDsarForm() {
       var f = document.getElementById('osno-dsar-iframe');
       if (!f) return;
       var target = f.getAttribute('data-src');
       if (!target) return;
-      function promote() {
-        if (f.getAttribute('src') !== target) f.setAttribute('src', target);
-      }
-      promote();
-      var tries = 0;
-      var iv = setInterval(function() {
-        promote();
-        if (++tries >= 10) clearInterval(iv);
-      }, 500);
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting && f.getAttribute('src') !== target) {
+            f.setAttribute('src', target);
+          }
+        });
+      });
+      io.observe(f);
     })();
 
     // DSAR iframe resize listener
