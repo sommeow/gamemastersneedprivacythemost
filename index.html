@@ -756,7 +756,6 @@
       </div>
       <iframe
         id="osno-dsar-iframe"
-        data-osano="ESSENTIAL"
         frameborder="0"
         data-src="https://my.datasubject.com/AzZcpvRm9bbsqngN/69968"
         width="100%"
@@ -909,6 +908,28 @@
       adjustForOsanoBanner();
       if (++osanoTries >= 20) clearInterval(osanoPoll);
     }, 300);
+
+    // The DSAR form is a privacy-rights tool and must load for everyone —
+    // including visitors who deny non-essential cookies. Osano classifies
+    // my.datasubject.com under a consent-gated category and won't promote it,
+    // so we inject the src ourselves. Keeping the URL in data-src hides it
+    // from Osano's initial blocking scan; a programmatically-set src is not
+    // re-blocked. Re-assert briefly in case Osano's async scan strips it.
+    (function ensureDsarForm() {
+      var f = document.getElementById('osno-dsar-iframe');
+      if (!f) return;
+      var target = f.getAttribute('data-src');
+      if (!target) return;
+      function promote() {
+        if (f.getAttribute('src') !== target) f.setAttribute('src', target);
+      }
+      promote();
+      var tries = 0;
+      var iv = setInterval(function() {
+        promote();
+        if (++tries >= 10) clearInterval(iv);
+      }, 500);
+    })();
 
     // DSAR iframe resize listener
     window.addEventListener('message', function(e) {
